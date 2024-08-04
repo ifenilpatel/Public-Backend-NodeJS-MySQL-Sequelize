@@ -31,6 +31,22 @@ const User = sequelize.define('Users', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    departmentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Departments',
+            key: 'departmentId'
+        }
+    },
+    designationId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'Designations',
+            key: 'designationId'
+        }
+    },
     isActive: {
         type: DataTypes.TINYINT,
         allowNull: false,
@@ -50,5 +66,13 @@ const User = sequelize.define('Users', {
         }
     }
 });
+
+// Define models for associations
+const Department = require('./departments.model.js');
+const Designation = require('./designations.model.js');
+
+// Define associations
+User.belongsTo(Department, { foreignKey: 'departmentId' });
+User.belongsTo(Designation, { foreignKey: 'designationId' });
 
 module.exports = User;

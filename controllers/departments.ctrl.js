@@ -2,24 +2,20 @@ const { ApiResponse } = require("../configuration/utils/ApiResponse.conf.js");
 
 const { flag, statusCode, status } = require("../configuration/utils/Constant.conf.js");
 
-const User = require("../models/users.model.js");
-const Department = require("../models/departments.model.js");
-const Designation = require("../models/designations.model.js");
+const Department = require('../models/departments.model.js');
 
 const fun_SelectById = async (req, res) => {
     try {
-        const userId = req.body.userId || 0;
-        const result = await User.findOne({
-            attributes: { exclude: ["passwordHash"] },
-            where: { userId: userId },
-        });
+        const departmentId = req.body.departmentId || 0;
+        const result = await Department.findOne({ where: { departmentId: departmentId } });
         if (!result) {
             return res.json(new ApiResponse(flag.fail, status.noData, statusCode.noData, []));
-        } else {
+        }
+        else {
             return res.json(new ApiResponse(flag.success, status.success, statusCode.success, result));
         }
     } catch (err) {
-        if (process.env.CODE_LOGS == "true") {
+        if (process.env.CODE_LOGS == 'true') {
             console.error(`Error: `, err);
         }
         return res.json(new ApiResponse(flag.fail, status.systemError, statusCode.systemError, { originalUrl: req.originalUrl }));
@@ -28,17 +24,13 @@ const fun_SelectById = async (req, res) => {
 
 const fun_SelectAll = async (req, res) => {
     try {
+
         let pageIndex = req.body.pageIndex || "";
         let pageSize = req.body.pageSize || "";
         // Calculate the offset
         const offset = (pageIndex - 1) * pageSize;
         // Fetch Users with pagination
-        const Users = await User.findAndCountAll({
-            include: [
-                { model: Department, attributes: ["title"] },
-                { model: Designation, attributes: ["title"] },
-            ],
-            attributes: { exclude: ["passwordHash"] },
+        const Users = await Department.findAndCountAll({
             limit: pageSize,
             offset: offset,
         });
@@ -54,7 +46,7 @@ const fun_SelectAll = async (req, res) => {
             );
         }
     } catch (err) {
-        if (process.env.CODE_LOGS == "true") {
+        if (process.env.CODE_LOGS == 'true') {
             console.error(`Error: `, err);
         }
         return res.json(new ApiResponse(flag.fail, status.systemError, statusCode.systemError, { originalUrl: req.originalUrl }));
@@ -63,14 +55,14 @@ const fun_SelectAll = async (req, res) => {
 
 const fun_DeleteById = async (req, res) => {
     try {
-        const userId = req.body.userId || 0;
-        const result = await User.destroy({ where: { userId } });
+        const departmentId = req.body.departmentId || 0;
+        const result = await Department.destroy({ where: { departmentId: departmentId } });
         if (!result) {
             return res.json(new ApiResponse(flag.fail, status.noData, statusCode.noData, []));
         }
         return res.json(new ApiResponse(flag.success, status.success, statusCode.delete, result));
     } catch (err) {
-        if (process.env.CODE_LOGS == "true") {
+        if (process.env.CODE_LOGS == 'true') {
             console.error(`Error: `, err);
         }
         return res.json(new ApiResponse(flag.fail, status.systemError, statusCode.systemError, { originalUrl: req.originalUrl }));
@@ -79,32 +71,11 @@ const fun_DeleteById = async (req, res) => {
 
 const fun_Insert = async (req, res) => {
     try {
-        const {
-            firstName,
-            lastName,
-            mobile,
-            emailId,
-            passwordHash,
-            departmentId,
-            designationId,
-
-            isActive,
-            createdBy,
-        } = req.body;
-        const result = await User.create({
-            firstName,
-            lastName,
-            mobile,
-            emailId,
-            passwordHash,
-            departmentId,
-            designationId,
-            isActive,
-            createdBy,
-        });
+        const { title, isActive, createdBy } = req.body;
+        const result = await Department.create({ title, isActive, createdBy });
         return res.json(new ApiResponse(flag.success, status.success, statusCode.insert, result));
     } catch (err) {
-        if (process.env.CODE_LOGS == "true") {
+        if (process.env.CODE_LOGS == 'true') {
             console.error(`Error: `, err);
         }
         return res.json(new ApiResponse(flag.fail, status.systemError, statusCode.systemError, { originalUrl: req.originalUrl }));
@@ -113,28 +84,16 @@ const fun_Insert = async (req, res) => {
 
 const fun_Update = async (req, res) => {
     try {
-        const { userId, firstName, lastName, mobile, emailId, departmentId, designationId, isActive, createdBy } = req.body;
-        const [result] = await User.update(
-            {
-                firstName,
-                lastName,
-                mobile,
-                emailId,
-                departmentId,
-                designationId,
-                isActive,
-                createdBy,
-            },
-            {
-                where: { userId },
-            }
-        );
+        const { departmentId, title, isActive, createdBy } = req.body;
+        const [result] = await Department.update({ title, isActive, createdBy }, {
+            where: { departmentId },
+        });
         if (!result) {
             return res.json(new ApiResponse(flag.fail, status.noData, statusCode.noData, []));
         }
         return res.json(new ApiResponse(flag.success, status.success, statusCode.update, result));
     } catch (err) {
-        if (process.env.CODE_LOGS == "true") {
+        if (process.env.CODE_LOGS == 'true') {
             console.error(`Error: `, err);
         }
         return res.json(new ApiResponse(flag.fail, status.systemError, statusCode.systemError, { originalUrl: req.originalUrl }));
